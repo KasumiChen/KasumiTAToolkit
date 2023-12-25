@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     let images = [];
     let imageSize = null;
+    let W = null;
+    let H = null;
     let imageElements = [];
 
     document.getElementById('imageInput').addEventListener('change', handleFileSelect, false);
@@ -9,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleFileSelect(event) {
         images = Array.from(event.target.files);
         imageSize = null;
+        W = null;
+        H = null;
         updateImagePreview();
     }
 
@@ -33,14 +37,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 imgElement.onload = () => {
                     if (imageSize === null) {
                         imageSize = imgElement.naturalWidth;
-                        if (imgElement.naturalWidth !== imgElement.naturalHeight) {
-                            alert("Images must be square. Please upload images with equal width and height.");
-                            images = [];
-                            imageElements = [];
-                            updateImagePreview();
-                            return;
-                        }
-                    } else if (imgElement.naturalWidth !== imageSize || imgElement.naturalHeight !== imageSize) {
+                        W = imgElement.naturalWidth;
+                        H = imgElement.naturalHeight;
+                    } else if (imgElement.naturalWidth !== W || imgElement.naturalHeight !== H) {
                         alert("All images must be of the same size. Please upload images with equal dimensions.");
                         images = [];
                         imageElements = [];
@@ -68,15 +67,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function mergeImages() {
         if (!imageSize || images.length === 0) {
-            alert("Please upload square images of the same size.");
+            alert("Please upload images");
             return;
         }
 
         let canvas = document.getElementById('canvas');
         let ctx = canvas.getContext('2d');
-        let totalWidth = imageSize * images.length;
+        let totalWidth = W * images.length;
         canvas.width = totalWidth;
-        canvas.height = imageSize;
+        canvas.height = H;
 
         mergeAndDownloadImages(canvas, ctx);
     }
@@ -86,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
         images.forEach((file, index) => {
             const img = new Image();
             img.onload = () => {
-                ctx.drawImage(img, index * imageSize, 0, imageSize, imageSize);
+                ctx.drawImage(img, index * W, 0, W, H);
                 loadedImages++;
                 if (loadedImages === images.length) {
                     displayResult(canvas.toDataURL('image/png'));
